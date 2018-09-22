@@ -43,6 +43,17 @@ public class EncryptionUtil {
 		this.signature = Signature.getInstance(SIGNATURE_FORMAT);
 	}
 
+	public KeyPair obtainKeyPair() throws Exception {
+		KeyPair keyPair = loadKeyPairFromFiles();
+		if (keyPair == null) {
+			io.print("Key Files not found; generating new keys");
+			keyPair = this.generateNewKeyPair();
+			storeKeyPairInFiles(keyPair);
+		}
+
+		return keyPair;
+	}
+	
 	public String signInput(String input, PrivateKey pivateKey) throws SignatureException, IOException, InvalidKeyException, NoSuchAlgorithmException {
 		signature.initSign(pivateKey);
 		updateSignature(input);
@@ -53,6 +64,20 @@ public class EncryptionUtil {
 		return signatureString;
 	}
 
+	public boolean verifyResults(Results results) throws InvalidKeyException, InvalidKeySpecException,
+			NoSuchAlgorithmException, SignatureException, IOException {
+		String trimmedPubKey = results.getPubkey().replace(PUBLIC_KEY_PREFIX.toString(), "").replace(PUBLIC_KEY_SUFFIX.toString(), "");
+		byte[] publicBytes = Base64Decoder.decode(trimmedPubKey);
+		X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicBytes);
+		KeyFactory keyFactory = KeyFactory.getInstance(ENCRYPTION_TYPE);
+		PublicKey pubKey = keyFactory.generatePublic(keySpec);
+
+		signature.initVerify(pubKey);
+		this.updateSignature(results.getMessage());
+
+		return signature.verify(Base64Decoder.decode(results.getSignature()));
+	}
+	
 	private void updateSignature(String input) throws SignatureException, IOException {
 		InputStream inputStream = null;
 		try {
@@ -69,17 +94,6 @@ public class EncryptionUtil {
 		}
 	}
 
-	public KeyPair obtainKeyPair() throws Exception {
-		KeyPair keyPair = loadKeyPairFromFiles();
-		if (keyPair == null) {
-			io.print("Key Files not found; generating new keys");
-			keyPair = this.generateNewKeyPair();
-			storeKeyPairInFiles(keyPair);
-		}
-
-		return keyPair;
-	}
-
 	private KeyPair generateNewKeyPair() {
 		KeyPairGenerator keyGen;
 		try {
@@ -92,7 +106,24 @@ public class EncryptionUtil {
 
 		return keyGen.generateKeyPair();
 	}
+	
+	private void storeKeyPairInFiles(KeyPair keyPair) throws IOException {
+		OutputStream out = null;
+		try {
+			io.print("Private key format: " + keyPair.getPrivate().getFormat());
+			String base64EncodedPrivateKey = Base64Encoder.encodeToString(keyPair.getPrivate().getEncoded());
+			String pemFormatPrivateKey = generatePrivateKeyString(base64EncodedPrivateKey);
+			io.writeEncodedKeyToFile(pemFormatPrivateKey, PRIVATE_KEY_FILENAME);
 
+			io.print("Public key format: " + keyPair.getPublic().getFormat());
+			String base64EncodedPublicKey = Base64Encoder.encodeToString(keyPair.getPublic().getEncoded());
+			String pemFormatPublicKey = generatePublicKeyString(base64EncodedPublicKey);
+			io.writeEncodedKeyToFile(pemFormatPublicKey, PUBLIC_KEY_FILENAME);
+		} finally {
+			if (out != null) { out.close(); }
+		}
+	}
+	
 	private KeyPair loadKeyPairFromFiles() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
 		KeyFactory kf = KeyFactory.getInstance(ENCRYPTION_TYPE);
 
@@ -115,35 +146,12 @@ public class EncryptionUtil {
 		System.out.println("Keys found in file, loaded");
 		return new KeyPair(pub, pvt);
 	}
-
-	private void storeKeyPairInFiles(KeyPair keyPair) throws IOException {
-		OutputStream out = null;
-		try {
-			io.print("Private key format: " + keyPair.getPrivate().getFormat());
-			String base64EncodedPrivateKey = Base64Encoder.encodeToString(keyPair.getPrivate().getEncoded());
-			String pemFormatPrivateKey = io.generatePrivateKeyString(base64EncodedPrivateKey);
-			io.writeEncodedKeyToFile(pemFormatPrivateKey, PRIVATE_KEY_FILENAME);
-
-			io.print("Public key format: " + keyPair.getPublic().getFormat());
-			String base64EncodedPublicKey = Base64Encoder.encodeToString(keyPair.getPublic().getEncoded());
-			String pemFormatPublicKey = io.generatePublicKeyString(base64EncodedPublicKey);
-			io.writeEncodedKeyToFile(pemFormatPublicKey, PUBLIC_KEY_FILENAME);
-		} finally {
-			if (out != null) { out.close(); }
-		}
+	
+	private String generatePublicKeyString(String encodedPublicKey) {
+		return PUBLIC_KEY_PREFIX + encodedPublicKey + PUBLIC_KEY_SUFFIX;
 	}
-
-	public boolean verifyResults(Results results) throws InvalidKeyException, InvalidKeySpecException,
-			NoSuchAlgorithmException, SignatureException, IOException {
-		String trimmedPubKey = results.getPubkey().replace(PUBLIC_KEY_PREFIX.toString(), "").replace(PUBLIC_KEY_SUFFIX.toString(), "");
-		byte[] publicBytes = Base64Decoder.decode(trimmedPubKey);
-		X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicBytes);
-		KeyFactory keyFactory = KeyFactory.getInstance(ENCRYPTION_TYPE);
-		PublicKey pubKey = keyFactory.generatePublic(keySpec);
-
-		signature.initVerify(pubKey);
-		this.updateSignature(results.getMessage());
-
-		return signature.verify(Base64Decoder.decode(results.getSignature()));
+	
+	private String generatePrivateKeyString(String encodedPrivateKey) {
+		return PRIVATE_KEY_PREFIX + encodedPrivateKey + PRIVATE_KEY_SUFFIX;
 	}
 }

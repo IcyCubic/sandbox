@@ -1,19 +1,11 @@
 package lai.henry.sandbox;
 
-import static lai.henry.sandbox.model.PEMTags.*;
-
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Writer;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.Key;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,26 +35,13 @@ public class IO {
     		if (out != null) out.close();
     	}
     }
-    
-	public byte[] readFileBytes(String filePath) {
-		Path path = Paths.get(filePath);
-		byte[] bytes;
-		try {
-			bytes = Files.readAllBytes(path);
-		} catch (IOException e) {
-			print("IO Exception; Probably missing Key files or initial run");
-			return null;
-		}
-		return bytes;
-	}
-	
+
 	public String getKey(String filename) throws IOException{
 	    String pemKey = "";
 	    BufferedReader reader;
 		try {
 			reader = new BufferedReader(new FileReader(filename));
 		} catch (FileNotFoundException e) {
-			print("Key file not found");
 			return null;
 		}
 	    String line;
@@ -71,13 +50,5 @@ public class IO {
 	    }
 	    reader.close();
 	    return pemKey;
-	}
-	
-	public String generatePublicKeyString(String encodedPublicKey) {
-		return PUBLIC_KEY_PREFIX + encodedPublicKey + PUBLIC_KEY_SUFFIX;
-	}
-	
-	public String generatePrivateKeyString(String encodedPrivateKey) {
-		return PRIVATE_KEY_PREFIX + encodedPrivateKey + PRIVATE_KEY_SUFFIX;
 	}
 }
