@@ -4,7 +4,7 @@ public enum PEMTags {
 	PUBLIC_KEY_PREFIX("-----BEGIN PUBLIC KEY-----\n"),
 	PUBLIC_KEY_SUFFIX("\n-----END PUBLIC KEY-----\n"),
 	PRIVATE_KEY_PREFIX("-----BEGIN PUBLIC KEY-----\n"),
-	PRIVATE_KEY_SUFFI("\n-----END PUBLIC KEY-----\n");
+	PRIVATE_KEY_SUFFIX("\n-----END PUBLIC KEY-----\n");
 
     private String value;
 

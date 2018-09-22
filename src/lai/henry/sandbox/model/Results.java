@@ -1,4 +1,5 @@
 package lai.henry.sandbox.model;
+
 /*
  * POJO representing the computed results of the input string
  * */
@@ -13,13 +14,15 @@ public class Results {
 		this.signature = signature;
 		this.pubkey = pubkey;
 	}
-	
+
 	public String getMessage() {
 		return message;
 	}
+
 	public String getSignature() {
 		return signature;
 	}
+
 	public String getPubkey() {
 		return pubkey;
 	}
