@@ -1,0 +1,12 @@
+# Eclipse Files # 
+*.ucls
+.classpath
+.project
+.settings/
+.springBeans
+
+# keys #
+*.key
+
+# binaries #
+bin/
