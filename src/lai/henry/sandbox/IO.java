@@ -19,23 +19,49 @@ public class IO {
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 	}
 	
+	/**
+	 * Prints a string through System.out.println.
+	 *
+	 * @param  message	the String to be printed
+	 */
     public void print(String message) {
     	System.out.println(message);
     }
-    
+
+    /**
+     * Renders an object into a JSON string if possible and prints the result
+     * in an indented output.  
+     *
+     * @param  obj	the object to be rendered and printed
+     * @throws JsonProcessingException if the object cannot be rendered as a JSON string
+     */
     public void print(Object obj) throws JsonProcessingException {
+    	// This is just for convience of converting a POJO into JSON 
     	this.print(mapper.writeValueAsString(obj));
     }
 	
-    public void writeEncodedKeyToFile(String Base64EncodedKey, String filename) throws IOException {
+    /**
+     * Writes the specified file to disk
+     *
+     * @param  content	the intended contents of the file
+     * @param  filename	the system-dependent filename 
+     * @throws IOException
+     */
+    public void writeEncodedKeyToFile(String content, String filename) throws IOException {
     	Writer out = new FileWriter(filename);
     	try {
-    		out.write(Base64EncodedKey);
+    		out.write(content);
     	} finally {
     		if (out != null) out.close();
     	}
     }
-
+    
+    /**
+     * Retrieves the text content of the specified file
+     *
+     * @param  filename	the system-dependent filename 
+     * @throws IOException
+     */
 	public String getKey(String filename) throws IOException{
 	    String pemKey = "";
 	    BufferedReader reader;

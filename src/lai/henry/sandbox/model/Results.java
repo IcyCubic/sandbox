@@ -1,8 +1,9 @@
 package lai.henry.sandbox.model;
 
-/*
- * POJO representing the computed results of the input string
- * */
+/**
+ * A POJO representing the generated results containing the original message,
+ * the signature and the public key
+ */
 public class Results {
 	private final String message;
 	private final String signature;

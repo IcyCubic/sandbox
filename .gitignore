@@ -10,3 +10,4 @@
 
 # binaries #
 bin/
+/target/

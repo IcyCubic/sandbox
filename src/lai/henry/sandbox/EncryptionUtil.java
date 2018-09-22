@@ -43,6 +43,14 @@ public class EncryptionUtil {
 		this.signature = Signature.getInstance(SIGNATURE_FORMAT);
 	}
 
+	/**
+	 * This method tries to retrieve the KeyPair from disk if possible. If it cannot
+	 * fild the files it will generate a new KeyPair and persist the newly generated
+	 * keys to file
+	 *
+	 * @return An 2048 size RSA public/private KeyPair
+	 * @see java.security.KeyPair
+	 */
 	public KeyPair obtainKeyPair() throws Exception {
 		KeyPair keyPair = loadKeyPairFromFiles();
 		if (keyPair == null) {
@@ -53,7 +61,15 @@ public class EncryptionUtil {
 
 		return keyPair;
 	}
-	
+
+	/**
+	 * This method generates a Base64 encoded cryptographic signature of the input
+	 * derived from the PrivateKey and SHA256
+	 *
+	 * @param input      the input to be signed
+	 * @param pivateKey the PrivateKey to be used to generate the signature
+	 * @return Base64 encoded cryptographic signature
+	 */
 	public String signInput(String input, PrivateKey pivateKey) throws SignatureException, IOException, InvalidKeyException, NoSuchAlgorithmException {
 		signature.initSign(pivateKey);
 		updateSignature(input);
@@ -64,8 +80,13 @@ public class EncryptionUtil {
 		return signatureString;
 	}
 
-	public boolean verifyResults(Results results) throws InvalidKeyException, InvalidKeySpecException,
-			NoSuchAlgorithmException, SignatureException, IOException {
+	/**
+	 * Verifies the signature against the public key and the message
+	 *
+	 * @param results	the Results 
+	 * @see lai.henry.sandbox.model.Results
+	 */
+	public boolean verifyResults(Results results) throws InvalidKeyException, InvalidKeySpecException, NoSuchAlgorithmException, SignatureException, IOException {
 		String trimmedPubKey = results.getPubkey().replace(PUBLIC_KEY_PREFIX.toString(), "").replace(PUBLIC_KEY_SUFFIX.toString(), "");
 		byte[] publicBytes = Base64Decoder.decode(trimmedPubKey);
 		X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicBytes);
@@ -77,7 +98,7 @@ public class EncryptionUtil {
 
 		return signature.verify(Base64Decoder.decode(results.getSignature()));
 	}
-	
+
 	private void updateSignature(String input) throws SignatureException, IOException {
 		InputStream inputStream = null;
 		try {
@@ -106,7 +127,7 @@ public class EncryptionUtil {
 
 		return keyGen.generateKeyPair();
 	}
-	
+
 	private void storeKeyPairInFiles(KeyPair keyPair) throws IOException {
 		OutputStream out = null;
 		try {
@@ -120,25 +141,33 @@ public class EncryptionUtil {
 			String pemFormatPublicKey = generatePublicKeyString(base64EncodedPublicKey);
 			io.writeEncodedKeyToFile(pemFormatPublicKey, PUBLIC_KEY_FILENAME);
 		} finally {
-			if (out != null) { out.close(); }
+			if (out != null) {
+				out.close();
+			}
 		}
 	}
-	
+
 	private KeyPair loadKeyPairFromFiles() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
 		KeyFactory kf = KeyFactory.getInstance(ENCRYPTION_TYPE);
 
 		// generate private key
 		String privatePemKey = io.getKey(PRIVATE_KEY_FILENAME);
-		if (privatePemKey == null) { return null; }
-		String trimmedPrivateKey = privatePemKey.replace(PRIVATE_KEY_PREFIX.toString(), "").replace(PRIVATE_KEY_SUFFIX.toString(), "");
+		if (privatePemKey == null) {
+			return null;
+		}
+		String trimmedPrivateKey = privatePemKey.replace(PRIVATE_KEY_PREFIX.toString(), "")
+				.replace(PRIVATE_KEY_SUFFIX.toString(), "");
 		byte[] privateKeyBytes = Base64Decoder.decode(trimmedPrivateKey);
 		PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
 		PrivateKey pvt = kf.generatePrivate(privateKeySpec);
 
 		// generate public key
 		String publicPemKey = io.getKey(PUBLIC_KEY_FILENAME);
-		if (publicPemKey == null) { return null; }
-		String trimmedPublicKey = publicPemKey.replace(PUBLIC_KEY_PREFIX.toString(), "").replace(PUBLIC_KEY_SUFFIX.toString(), "");
+		if (publicPemKey == null) {
+			return null;
+		}
+		String trimmedPublicKey = publicPemKey.replace(PUBLIC_KEY_PREFIX.toString(), "")
+				.replace(PUBLIC_KEY_SUFFIX.toString(), "");
 		byte[] publicKeyBytes = Base64Decoder.decode(trimmedPublicKey);
 		X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
 		PublicKey pub = kf.generatePublic(publicKeySpec);
@@ -146,11 +175,11 @@ public class EncryptionUtil {
 		System.out.println("Keys found in file, loaded");
 		return new KeyPair(pub, pvt);
 	}
-	
+
 	private String generatePublicKeyString(String encodedPublicKey) {
 		return PUBLIC_KEY_PREFIX + encodedPublicKey + PUBLIC_KEY_SUFFIX;
 	}
-	
+
 	private String generatePrivateKeyString(String encodedPrivateKey) {
 		return PRIVATE_KEY_PREFIX + encodedPrivateKey + PRIVATE_KEY_SUFFIX;
 	}
