@@ -1,16 +1,12 @@
 package lai.henry.sandbox;
 
-import static lai.henry.sandbox.model.PEMTags.*;
-
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 
 import lai.henry.sandbox.model.Results;
 
 public class Application {
 
-	private static final Base64.Encoder encoder = Base64.getEncoder();
 	private static final IO io = new IO();
 
 	private final EncryptionUtil encryptionUtil;
@@ -51,7 +47,7 @@ public class Application {
 		KeyPair keyPair = app.encryptionUtil.obtainKeyPair();
 
 		String signatureString = app.encryptionUtil.signInput(input, keyPair.getPrivate());
-		String publicKey = generatePublicKeyString(keyPair.getPublic().getEncoded());
+		String publicKey = app.encryptionUtil.generatePublicKeyString(keyPair.getPublic().getEncoded());
 
 		Results results = new Results(input, signatureString, publicKey);
 		io.print(results);
@@ -60,11 +56,6 @@ public class Application {
 			io.print("Validated results");
 		} else {
 			io.print("Invalid Results!!");
-		}
-		;
-	}
-
-	private static String generatePublicKeyString(byte[] bytes) {
-		return PUBLIC_KEY_PREFIX + encoder.encodeToString(bytes) + PUBLIC_KEY_SUFFIX;
+		};
 	}
 }

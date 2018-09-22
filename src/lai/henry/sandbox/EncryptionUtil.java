@@ -175,7 +175,17 @@ public class EncryptionUtil {
 		System.out.println("Keys found in file, loaded");
 		return new KeyPair(pub, pvt);
 	}
-
+	
+	/**
+	 * Base64 encodes the byte array and adds the PEM tags to the resulting string
+	 *
+	 * @param bytes	 encoded bytes from a key
+	 * @return PEM formatted Public Key string
+	 */
+	public String generatePublicKeyString(byte[] bytes) {
+		return PUBLIC_KEY_PREFIX + Base64Encoder.encodeToString(bytes) + PUBLIC_KEY_SUFFIX;
+	}
+	
 	private String generatePublicKeyString(String encodedPublicKey) {
 		return PUBLIC_KEY_PREFIX + encodedPublicKey + PUBLIC_KEY_SUFFIX;
 	}
