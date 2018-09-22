@@ -62,7 +62,7 @@ public class IO {
 		try {
 			reader = new BufferedReader(new FileReader(filename));
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			print("Key file not found");
 			return null;
 		}
 	    String line;
