@@ -5,7 +5,7 @@
 	<groupId>Sandbox</groupId>
 	<artifactId>signature_tool</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<dependencies>	
+	<dependencies>
 		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -19,7 +19,7 @@
 			<artifactId>jackson-databind</artifactId>
 			<version>2.9.6</version>
 		</dependency>
-	
+
 	</dependencies>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
@@ -31,6 +31,33 @@
 					<source>1.8</source>
 					<target>1.8</target>
 				</configuration>
+			</plugin>
+			<plugin> <!-- Build an executable JAR -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.1.0</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+							<classpathPrefix>lib/</classpathPrefix>
+							<mainClass>lai.henry.sandbox.Application</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+			<plugin> <!-- Shaded JAR -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>1.6</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
