@@ -8,17 +8,7 @@ import lai.henry.sandbox.model.Results;
 public class Application {
 
 	private static final IO io = new IO();
-
 	private final EncryptionUtil encryptionUtil;
-	/*
-	 * TODO Unit Tests 
-	 * Include Unit Test(s) with instructions on how a Continuous Integration system can execute your test(s)
-	 */
-
-	/*
-	 * TODO Dockerfile docker build . -t codechal docker run codechal
-	 * "your@email.com"
-	 */
 
 	public Application() throws NoSuchAlgorithmException {
 		this.encryptionUtil = new EncryptionUtil();
@@ -51,11 +41,5 @@ public class Application {
 
 		Results results = new Results(input, signatureString, publicKey);
 		io.print(results);
-
-		if (app.encryptionUtil.verifyResults(results)) {
-			io.print("Validated results");
-		} else {
-			io.print("Invalid Results!!");
-		};
 	}
 }
