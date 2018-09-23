@@ -20,16 +20,14 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
-import lai.henry.sandbox.model.Results;
 
 public class EncryptionUtil {
 
 	// This info would likely be stored in a configuration file somewhere
-	private static final String PUBLIC_KEY_FILENAME = "public.key";
-	private static final String PRIVATE_KEY_FILENAME = "private.key";
-
-	private static final String SIGNATURE_FORMAT = "SHA256withRSA";
-	private static final String ENCRYPTION_TYPE = "RSA";
+	static final String PUBLIC_KEY_FILENAME = "public.key";
+	static final String PRIVATE_KEY_FILENAME = "private.key";
+	static final String SIGNATURE_FORMAT = "SHA256withRSA";
+	static final String ENCRYPTION_TYPE = "RSA";
 	private static final int BUFFER_LENGTH = 2048;
 	private static final int KEY_SIZE = 2048; // typical key size for RSA encryption
 
@@ -78,25 +76,6 @@ public class EncryptionUtil {
 
 		String signatureString = Base64Encoder.encodeToString(signatureBytes);
 		return signatureString;
-	}
-
-	/**
-	 * Verifies the signature against the public key and the message
-	 *
-	 * @param results	the Results 
-	 * @see lai.henry.sandbox.model.Results
-	 */
-	public boolean verifyResults(Results results) throws InvalidKeyException, InvalidKeySpecException, NoSuchAlgorithmException, SignatureException, IOException {
-		String trimmedPubKey = results.getPubkey().replace(PUBLIC_KEY_PREFIX.toString(), "").replace(PUBLIC_KEY_SUFFIX.toString(), "");
-		byte[] publicBytes = Base64Decoder.decode(trimmedPubKey);
-		X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicBytes);
-		KeyFactory keyFactory = KeyFactory.getInstance(ENCRYPTION_TYPE);
-		PublicKey pubKey = keyFactory.generatePublic(keySpec);
-
-		signature.initVerify(pubKey);
-		this.updateSignature(results.getMessage());
-
-		return signature.verify(Base64Decoder.decode(results.getSignature()));
 	}
 
 	private void updateSignature(String input) throws SignatureException, IOException {
